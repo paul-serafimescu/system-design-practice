@@ -8,7 +8,6 @@ services:
     ports:
       - '5432:5432'
     volumes: 
-      - ./db:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
   
   websocket-server:
@@ -18,9 +17,23 @@ services:
     depends_on:
       - postgres
     ports:
-      - '8080:8080'
+      - '8081:8080'
     environment:
       - DB_HOST=postgres
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=wss_dev
+
+  http-server:
+    build:
+      context: ./http-server
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - '8080:8080'
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=api_dev

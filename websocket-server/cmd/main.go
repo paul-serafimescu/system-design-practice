@@ -1,9 +1,9 @@
 package main
 
 import (
-	"chat/websocket"
 	"log"
 	"net/http"
+	"websocket-server/websocket"
 )
 
 func main() {

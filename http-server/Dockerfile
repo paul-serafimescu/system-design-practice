@@ -8,11 +8,11 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o websocket-server cmd/main.go
+RUN go build -o http-server cmd/main.go
 
 EXPOSE 8080
 
-CMD ["./websocket-server"]
+CMD ["./http-server"]
 
 # docker build -t websocket-server .
 # docker run -p 8080:8080 websocket-server

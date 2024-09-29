@@ -1,1 +1,2 @@
 CREATE DATABASE wss_dev;
+CREATE DATABASE api_dev;
