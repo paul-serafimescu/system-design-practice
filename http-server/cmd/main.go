@@ -21,11 +21,21 @@ func main() {
 	defer pg.Close()
 
 	if err := pg.Ping(context.Background()); err != nil {
-		fmt.Println("error connecting")
-		os.Exit(1) // TODO
 		fmt.Printf("%s\n", err.Error())
+		os.Exit(1) // TODO
 	} else {
 		fmt.Println("Connected to database...")
+	}
+
+	cache := database.ConnectToCache(context.Background(), cfg)
+
+	defer cache.Close()
+
+	if _, err := cache.Ping(context.Background()); err != nil {
+		fmt.Printf("%s\n", err.Error())
+		os.Exit(1)
+	} else {
+		fmt.Println("Connected to cache (redis)...")
 	}
 
 	apiServer := api.CreateApiServer()

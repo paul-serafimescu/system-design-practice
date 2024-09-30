@@ -18,7 +18,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 /* START HTTP SERVER                */
 /************************************/
 
-CREATE TABLE IF NOT EXISTS Users (
+CREATE TABLE IF NOT EXISTS users (
     user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash CHAR(64) NOT NULL,
@@ -28,6 +28,24 @@ CREATE TABLE IF NOT EXISTS Users (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TYPE RegisteredServiceStatus AS ENUM ('UP', 'DOWN');
+
+CREATE TABLE IF NOT EXISTS registered_service (
+    registered_service_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    hostname VARCHAR(255) NOT NULL,
+    port INT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    status RegisteredServiceStatus NOT NULL,
+    type INT NOT NULL
+);
+
+ALTER TABLE registered_service
+ALTER COLUMN Status TYPE RegisteredServiceStatus USING Status::RegisteredServiceStatus;
+
+ALTER TABLE registered_service
+ADD CONSTRAINT service_type_check CHECK (Type IN (0, 1));
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$

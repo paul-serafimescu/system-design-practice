@@ -24,6 +24,10 @@ func CreateApiServer() *ApiServer {
 		r.Post("/login", CreateSession)
 	})
 
+	r.Route("/services", func(r chi.Router) {
+		r.Post("/register", RegisterService)
+	})
+
 	return &ApiServer{
 		router: r,
 	}
