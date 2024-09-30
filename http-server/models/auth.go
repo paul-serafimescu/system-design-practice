@@ -1,13 +1,28 @@
 package models
 
+import "time"
+
 type SessionRequest struct {
-	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 	// TODO
 }
 
-type User struct {
-	Username string
-	Email    string
+type SignupRequest struct {
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	Username  string `json:"username"`
+	FirstName string `json:"firstname"`
+	LastName  string `json:"lastname"`
 	// TODO
+}
+
+type User struct {
+	ID            string
+	Username      string
+	Email         string
+	FirstName     string
+	LastName      string
+	CreatedAt     time.Time
+	LastUpdatedAt time.Time
 }

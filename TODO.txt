@@ -1,0 +1,2 @@
+- zerolog? golang default logger is awful
+- figure out how we want to manage sessions exactly (token? i hate cookies)

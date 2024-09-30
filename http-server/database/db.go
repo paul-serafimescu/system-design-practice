@@ -41,3 +41,7 @@ func (pg *postgres) Ping(ctx context.Context) error {
 func (pg *postgres) Close() {
 	pg.db.Close()
 }
+
+func Get() *pgxpool.Pool {
+	return pgInstance.db
+}

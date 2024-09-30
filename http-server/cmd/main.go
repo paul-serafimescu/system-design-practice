@@ -18,11 +18,14 @@ func main() {
 		os.Exit(1) // change this later
 	}
 
-	if pg.Ping(context.Background()) != nil {
+	defer pg.Close()
+
+	if err := pg.Ping(context.Background()); err != nil {
 		fmt.Println("error connecting")
 		os.Exit(1) // TODO
+		fmt.Printf("%s\n", err.Error())
 	} else {
-		fmt.Println("connected!!")
+		fmt.Println("Connected to database...")
 	}
 
 	apiServer := api.CreateApiServer()

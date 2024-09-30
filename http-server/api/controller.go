@@ -20,6 +20,7 @@ func CreateApiServer() *ApiServer {
 	})
 
 	r.Route("/auth", func(r chi.Router) {
+		r.Post("/signup", CreateNewAccount)
 		r.Post("/login", CreateSession)
 	})
 
