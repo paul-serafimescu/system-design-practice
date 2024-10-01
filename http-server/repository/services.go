@@ -60,3 +60,24 @@ func GetAllAvailableServicesOfType(serviceType models.ServiceType) ([]models.Reg
 
 	return services, nil
 }
+
+func GetServiceByServiceId(serviceId string) (*models.RegisteredService, error) {
+	var service models.RegisteredService
+	sql := "SELECT registered_service_id, hostname, port, created_at, updated_at, status, type FROM registered_service WHERE registered_service_id = $1"
+
+	err := database.Get().QueryRow(context.Background(), sql, serviceId).Scan(
+		&service.ID,
+		&service.Hostname,
+		&service.Port,
+		&service.CreatedAt,
+		&service.LastUpdatedAt,
+		&service.Status,
+		&service.Type,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &service, nil
+}

@@ -69,3 +69,34 @@ func DeregisterService(serviceId string) error {
 
 	return nil
 }
+
+func RefreshServiceStatus(serviceId string) error {
+	ctx := context.Background()
+	cache := database.GetCache()
+
+	service, err := repository.GetServiceByServiceId(serviceId)
+	if err != nil {
+		return err
+	}
+
+	if service.Status == models.Down {
+		return fmt.Errorf("cannot refresh status: %s", "TTL expired")
+	}
+
+	switch service.Type {
+	case models.Websocket:
+		res, err := cache.Expire(ctx, fmt.Sprintf("websocket:%s", serviceId), 5*time.Minute).Result()
+
+		if err != nil {
+			return err
+		}
+
+		if !res {
+			return fmt.Errorf("cannot refresh status: %s", "TTL expired")
+		}
+	default:
+		return fmt.Errorf("unknown or invalid service type")
+	}
+
+	return nil
+}

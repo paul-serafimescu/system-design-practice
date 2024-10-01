@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 	"websocket-server/config"
 	"websocket-server/service"
 
@@ -62,7 +63,17 @@ func (wss *WebsocketServer) Start(cfg *config.Config) error {
 	wss.hostname = tcpAddr.IP.String() // small issue: this returns :: but apparently docker-compose handles its own DNS? weird. so we only need port i guess
 	wss.port = tcpAddr.Port
 
-	service.RegisterService(cfg, wss.GetHostname(), wss.GetPort())
+	serviceId, err := service.RegisterService(cfg, wss.GetHostname(), wss.GetPort())
+	if err != nil {
+		panic(err)
+	}
+
+	ticker := time.NewTicker(20 * time.Second)
+	go func() {
+		for range ticker.C {
+			service.SendHeartbeat(serviceId, cfg.RegistryHost, cfg.RegistryPort)
+		}
+	}()
 
 	fmt.Printf("Listening on port: %d\n", wss.port)
 

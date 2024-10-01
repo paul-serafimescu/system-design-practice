@@ -54,3 +54,14 @@ func DeregisterService(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func ReceiveHeartbeat(w http.ResponseWriter, r *http.Request) {
+	serviceId := r.Header.Get("x-service-id")
+
+	err := service.RefreshServiceStatus(serviceId)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

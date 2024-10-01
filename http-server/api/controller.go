@@ -27,6 +27,7 @@ func CreateApiServer() *ApiServer {
 	r.Route("/services", func(r chi.Router) {
 		r.Post("/register", RegisterService)
 		r.Delete("/deregister/{serviceID}", DeregisterService)
+		r.Get("/heartbeat", ReceiveHeartbeat)
 	})
 
 	return &ApiServer{
