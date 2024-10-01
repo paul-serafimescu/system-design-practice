@@ -14,12 +14,14 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true }, // don't care about CSRF right now
 }
 
-func WsHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+func WsConnectionHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil) // nil because no cookies (for now at least)
+
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
 	fmt.Printf("%+v", r)
 	fmt.Println("Client connected")
 	conn.Close()

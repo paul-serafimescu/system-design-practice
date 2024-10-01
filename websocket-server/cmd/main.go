@@ -1,12 +1,16 @@
 package main
 
 import (
-	"log"
-	"net/http"
+	"fmt"
+	"websocket-server/config"
 	"websocket-server/websocket"
 )
 
 func main() {
-	http.HandleFunc("/ws", websocket.WsHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	cfg := config.GetConfig()
+
+	wsServer := websocket.InitializeWebsocketServer()
+	if err := wsServer.Start(cfg); err != nil {
+		fmt.Printf("%s", err.Error())
+	}
 }
