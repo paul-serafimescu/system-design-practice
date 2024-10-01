@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS registered_service (
     registered_service_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     hostname VARCHAR(255) NOT NULL,
     port INT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     status RegisteredServiceStatus NOT NULL,
     type INT NOT NULL
 );
@@ -50,13 +50,18 @@ ADD CONSTRAINT service_type_check CHECK (Type IN (0, 1));
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-   NEW.UpdatedAt = NOW();
+   NEW.updated_at = NOW();
    RETURN NEW;
 END;
 $$ language 'plpgsql';
 
 CREATE TRIGGER update_users_updated_at
-BEFORE UPDATE ON Users
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_services_updated_at
+BEFORE UPDATE ON registered_service
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 

@@ -5,6 +5,8 @@ import (
 	"http-server/models"
 	"http-server/service"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func RegisterService(w http.ResponseWriter, r *http.Request) {
@@ -40,4 +42,15 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(*serviceId))
+}
+
+func DeregisterService(w http.ResponseWriter, r *http.Request) {
+	serviceId := chi.URLParam(r, "serviceID")
+
+	if err := service.DeregisterService(serviceId); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
