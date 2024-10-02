@@ -24,6 +24,12 @@ func GetChatWebsocketServer() (*models.RegisteredService, error) {
 	return &servers[0], nil // change this to actually load balance lol
 }
 
+func FlagServiceAsDown(serviceId string) error {
+	_, err := repository.UpdateServiceStatus(serviceId, models.Down)
+
+	return err
+}
+
 // TODO: right now we generate the service id and dump it in redis, but it would probably be good to keep a backup on postgres
 func RegisterWebsocket(r *models.ServiceRegistrationRequest) (*string, error) {
 	ctx := context.Background()
@@ -43,13 +49,13 @@ func RegisterWebsocket(r *models.ServiceRegistrationRequest) (*string, error) {
 		return nil, err
 	}
 
-	expiration := 5 * time.Minute
+	expiration := 300 * time.Second
 	if err := cache.Expire(ctx, hkey, expiration).Err(); err != nil {
 		return nil, err
 	}
 
 	// TODO: change this message to a proper log
-	fmt.Printf("websocket service with id: %s has been registered and will expire in 300 seconds\n", serviceId)
+	fmt.Printf("websocket service with id: %s has been registered and will expire in %s\n", serviceId, expiration.String())
 
 	return &serviceId, nil
 }

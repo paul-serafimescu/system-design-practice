@@ -20,8 +20,10 @@ services:
       context: ./websocket-server
       dockerfile: Dockerfile
     depends_on:
+      http-server:
+          condition: service_started
       postgres:
-        condition: service_healthy
+          condition: service_healthy
     ports:
       - '9000:9000'
     environment:
@@ -54,6 +56,7 @@ services:
   redis:
     image: redis:7-alpine
     restart: always
+    command: ["redis-server", "--notify-keyspace-events", "Ex"]
     ports:
       - '6379:6379'
     healthcheck:
@@ -61,6 +64,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    
   nginx:
     image: nginx:latest
     ports:

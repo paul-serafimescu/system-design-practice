@@ -73,10 +73,18 @@ func (wss *WebsocketServer) Start(cfg *config.Config) error {
 		panic(err)
 	}
 
-	ticker := time.NewTicker(60 * time.Second)
+	ticker := time.NewTicker(120 * time.Second)
 	go func() {
 		for range ticker.C {
-			service.SendHeartbeat(serviceId, cfg.RegistryHost, cfg.RegistryPort)
+			isExpired := service.SendHeartbeat(serviceId, cfg.RegistryHost, cfg.RegistryPort)
+
+			if isExpired {
+				serviceId, err = service.RegisterService(cfg, wss.GetHostname(), wss.GetPort())
+
+				if err != nil {
+					panic(err)
+				}
+			}
 		}
 	}()
 

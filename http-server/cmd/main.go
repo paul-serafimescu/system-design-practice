@@ -6,6 +6,7 @@ import (
 	"http-server/api"
 	"http-server/config"
 	"http-server/database"
+	"http-server/service"
 	"os"
 )
 
@@ -37,6 +38,24 @@ func main() {
 	} else {
 		fmt.Println("Connected to cache (redis)...")
 	}
+
+	cache.OnWebsocketExpiration = func(serviceId string) error {
+		err := service.FlagServiceAsDown(serviceId)
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("service %s is DOWN", serviceId)
+
+		return nil
+	}
+
+	cache.OnError = func(err error) {
+		fmt.Printf("%s", err.Error())
+	}
+
+	go cache.HandleKeyExpiration()
 
 	apiServer := api.CreateApiServer()
 	apiServer.StartListening()

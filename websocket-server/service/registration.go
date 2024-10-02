@@ -11,12 +11,15 @@ import (
 	"websocket-server/models"
 )
 
-func SendHeartbeat(serviceId string, hostname string, port string) {
+// return true if we expired, false otherwise
+func SendHeartbeat(serviceId string, hostname string, port string) bool {
+	fmt.Printf("Sending heartbeat for service %s\n", serviceId)
+
 	url := fmt.Sprintf("http://%s:%s/services/heartbeat", hostname, port)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		fmt.Printf("Failed to send heartbeat: %v", err)
-		return
+		return false
 	}
 
 	req.Header.Set("x-service-id", serviceId)
@@ -25,11 +28,13 @@ func SendHeartbeat(serviceId string, hostname string, port string) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Failed to send heartbeat: %v", err)
-		return
+		return false
 	}
 
 	defer resp.Body.Close()
 	log.Printf("Heartbeat sent to %s, status code: %d", url, resp.StatusCode)
+
+	return resp.StatusCode >= 400
 }
 
 func RegisterService(cfg *config.Config, hostname string, port int) (string, error) {
