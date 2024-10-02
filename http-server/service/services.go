@@ -15,6 +15,15 @@ func ValidateRegistrationRequest(r *models.ServiceRegistrationRequest) bool {
 	return true // TODO: implement some extra checks to make sure it's all good
 }
 
+func GetChatWebsocketServer() (*models.RegisteredService, error) {
+	servers, err := repository.GetAllAvailableServicesOfType(models.Websocket)
+	if err != nil {
+		return nil, err
+	}
+
+	return &servers[0], nil // change this to actually load balance lol
+}
+
 // TODO: right now we generate the service id and dump it in redis, but it would probably be good to keep a backup on postgres
 func RegisterWebsocket(r *models.ServiceRegistrationRequest) (*string, error) {
 	ctx := context.Background()

@@ -10,6 +10,7 @@ import (
 )
 
 func RegisterService(w http.ResponseWriter, r *http.Request) {
+
 	var registrationRequest models.ServiceRegistrationRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&registrationRequest); err != nil {

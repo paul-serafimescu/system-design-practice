@@ -26,9 +26,7 @@ func InitializeWebsocketServer() *WebsocketServer {
 		w.Write([]byte("pong"))
 	})
 
-	r.Route("/ws", func(r chi.Router) {
-		r.HandleFunc("/connect", WsConnectionHandler)
-	})
+	r.HandleFunc("/connect", WsConnectionHandler)
 
 	return &WebsocketServer{
 		router: r,
@@ -43,32 +41,39 @@ func (wss *WebsocketServer) GetPort() int {
 	return wss.port
 }
 
-func getPortListenerInRange(start, end int) (net.Listener, error) {
-	for port := start; port <= end; port++ {
-		listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
-		if err == nil {
-			return listener, nil
+func getPublicHostname() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+
+	for _, addr := range addrs {
+		// Check if the address is an IP address and not a loopback
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil { // Ensure it's an IPv4 address
+				return ipnet.IP.String(), nil
+			}
 		}
 	}
-	return nil, fmt.Errorf("no available port found in range %d-%d", start, end)
+
+	return "", fmt.Errorf("no valid public IP address found")
 }
 
 func (wss *WebsocketServer) Start(cfg *config.Config) error {
-	listener, err := getPortListenerInRange(8000, 8030) // for now
+	listener, err := net.Listen("tcp", ":9000") // for now
 	if err != nil {
 		panic(err)
 	}
 
-	tcpAddr := listener.Addr().(*net.TCPAddr)
-	wss.hostname = tcpAddr.IP.String() // small issue: this returns :: but apparently docker-compose handles its own DNS? weird. so we only need port i guess
-	wss.port = tcpAddr.Port
+	wss.hostname, _ = getPublicHostname()
+	wss.port = listener.Addr().(*net.TCPAddr).Port
 
 	serviceId, err := service.RegisterService(cfg, wss.GetHostname(), wss.GetPort())
 	if err != nil {
 		panic(err)
 	}
 
-	ticker := time.NewTicker(20 * time.Second)
+	ticker := time.NewTicker(60 * time.Second)
 	go func() {
 		for range ticker.C {
 			service.SendHeartbeat(serviceId, cfg.RegistryHost, cfg.RegistryPort)
@@ -77,5 +82,5 @@ func (wss *WebsocketServer) Start(cfg *config.Config) error {
 
 	fmt.Printf("Listening on port: %d\n", wss.port)
 
-	return http.Serve(listener, nil)
+	return http.Serve(listener, wss.router)
 }

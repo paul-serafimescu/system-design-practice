@@ -40,7 +40,7 @@ func UpdateServiceStatus(serviceId string, newStatus models.RegisteredServiceSta
 
 func GetAllAvailableServicesOfType(serviceType models.ServiceType) ([]models.RegisteredService, error) {
 	services := make([]models.RegisteredService, 0)
-	sql := "SELECT registered_service_id, hostname, port, created_at, updated_at, status, type FROM registered_service WHERE status = UP AND type = $1"
+	sql := "SELECT registered_service_id, hostname, port, created_at, updated_at, status, type FROM registered_service WHERE status = 'UP' AND type = $1"
 
 	rows, err := database.Get().Query(context.Background(), sql, models.Websocket)
 	if err != nil {
@@ -49,7 +49,7 @@ func GetAllAvailableServicesOfType(serviceType models.ServiceType) ([]models.Reg
 
 	for rows.Next() {
 		var service models.RegisteredService
-		err := rows.Scan(&service.ID, &service.Hostname, &service.Port, &service.Status, &service.Type)
+		err := rows.Scan(&service.ID, &service.Hostname, &service.Port, &service.CreatedAt, &service.LastUpdatedAt, &service.Status, &service.Type)
 
 		if err != nil {
 			return services, err

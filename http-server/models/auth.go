@@ -8,6 +8,12 @@ type SessionRequest struct {
 	// TODO
 }
 
+type SessionResponse struct {
+	Token      string `json:"token"`
+	WsHostname string `json:"chat_hostname"`
+	WsPort     int    `json:"chat_port"`
+}
+
 type SignupRequest struct {
 	Email     string `json:"email"`
 	Password  string `json:"password"`

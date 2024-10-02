@@ -6,6 +6,8 @@ import (
 	"http-server/models"
 	"http-server/service"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 // this function currently matches login credentials to a user
@@ -21,13 +23,23 @@ func CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, validated := service.ValidateSessionRequest(&sessionRequest)
+	_, validated := service.ValidateSessionRequest(&sessionRequest)
 
-	if !validated {
+	chatServer, err := service.GetChatWebsocketServer()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else if !validated {
 		http.Error(w, "Invalid Credentials", http.StatusNotFound)
 	} else {
-		fmt.Printf("%+v\n", user)
-		w.Write([]byte("success!")) // change this
+		resp, _ := json.Marshal(models.SessionResponse{
+			WsHostname: chatServer.Hostname,
+			WsPort:     chatServer.Port,
+			Token:      uuid.NewString(), // TODO: jwt on user
+		})
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
 	}
 }
 
