@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog/log"
 )
 
 type postgres struct {
@@ -25,7 +26,7 @@ func ConnectToDB(ctx context.Context, cfg *config.Config) (*postgres, error) {
 	pgOnce.Do(func() {
 		db, err := pgxpool.New(ctx, connString)
 		if err != nil {
-			fmt.Println("cannot connect")
+			log.Error().Msg("cannot connect")
 		}
 
 		pgInstance = &postgres{db}

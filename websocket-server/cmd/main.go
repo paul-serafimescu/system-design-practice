@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"websocket-server/config"
 	"websocket-server/websocket"
+
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -11,6 +12,6 @@ func main() {
 
 	wsServer := websocket.InitializeWebsocketServer()
 	if err := wsServer.Start(cfg); err != nil {
-		fmt.Printf("%s", err.Error())
+		log.Error().Msgf("%s", err.Error())
 	}
 }

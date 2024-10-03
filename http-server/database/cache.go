@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/rs/zerolog/log"
 )
 
 type cache struct {
@@ -53,7 +54,7 @@ func (c *cache) HandleKeyExpiration() {
 				c.OnError(err)
 			}
 		} else {
-			fmt.Printf("unknown key type: %s", msg.Payload)
+			log.Error().Msgf("unknown key type: %s", msg.Payload)
 		}
 	}
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rs/zerolog/log"
 )
 
 type WebsocketServer struct {
@@ -62,6 +63,7 @@ func getPublicHostname() (string, error) {
 func (wss *WebsocketServer) Start(cfg *config.Config) error {
 	listener, err := net.Listen("tcp", ":9000") // for now
 	if err != nil {
+		log.Fatal().Msgf("%v", err)
 		panic(err)
 	}
 
@@ -70,6 +72,7 @@ func (wss *WebsocketServer) Start(cfg *config.Config) error {
 
 	serviceId, err := service.RegisterService(cfg, wss.GetHostname(), wss.GetPort())
 	if err != nil {
+		log.Fatal().Msgf("%v", err)
 		panic(err)
 	}
 
@@ -82,13 +85,14 @@ func (wss *WebsocketServer) Start(cfg *config.Config) error {
 				serviceId, err = service.RegisterService(cfg, wss.GetHostname(), wss.GetPort())
 
 				if err != nil {
+					log.Fatal().Msgf("%v", err)
 					panic(err)
 				}
 			}
 		}
 	}()
 
-	fmt.Printf("Listening on port: %d\n", wss.port)
+	log.Info().Msgf("Listening on port: %d", wss.port)
 
 	return http.Serve(listener, wss.router)
 }

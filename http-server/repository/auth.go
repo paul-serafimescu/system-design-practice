@@ -4,7 +4,8 @@ import (
 	"context"
 	"http-server/database"
 	"http-server/models"
-	"log"
+
+	"github.com/rs/zerolog/log"
 )
 
 func GetUserById(userId string) *models.User {
@@ -22,7 +23,7 @@ func GetUserById(userId string) *models.User {
 	)
 
 	if err != nil {
-		log.Printf("%s\n", err.Error())
+		log.Error().Msgf("%s", err.Error())
 		return nil
 	}
 
@@ -46,7 +47,7 @@ func CreateNewUser(username string, hashedPassword string, email string, firstna
 		lastname).Scan(&user.ID, &user.CreatedAt, &user.LastUpdatedAt)
 
 	if err != nil {
-		log.Printf("%s\n", err.Error())
+		log.Error().Msgf("%s", err.Error())
 		return nil
 	}
 
@@ -68,7 +69,7 @@ func GetUserByEmailAndPassword(email string, password string) *models.User {
 	)
 
 	if err != nil {
-		log.Printf("%s\n", err.Error())
+		log.Error().Msgf("%s", err.Error())
 		return nil
 	}
 

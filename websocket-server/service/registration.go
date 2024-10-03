@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"websocket-server/config"
 	"websocket-server/models"
+
+	"github.com/rs/zerolog/log"
 )
 
 // return true if we expired, false otherwise
@@ -18,7 +19,7 @@ func SendHeartbeat(serviceId string, hostname string, port string) bool {
 	url := fmt.Sprintf("http://%s:%s/services/heartbeat", hostname, port)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		fmt.Printf("Failed to send heartbeat: %v", err)
+		log.Error().Msgf("Failed to send heartbeat: %v", err)
 		return false
 	}
 
@@ -27,12 +28,12 @@ func SendHeartbeat(serviceId string, hostname string, port string) bool {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Failed to send heartbeat: %v", err)
+		log.Error().Msgf("Failed to send heartbeat: %v", err)
 		return false
 	}
 
 	defer resp.Body.Close()
-	log.Printf("Heartbeat sent to %s, status code: %d", url, resp.StatusCode)
+	log.Info().Msgf("Heartbeat sent to %s, status code: %d", url, resp.StatusCode)
 
 	return resp.StatusCode >= 400
 }
@@ -49,12 +50,12 @@ func RegisterService(cfg *config.Config, hostname string, port int) (string, err
 	resp, err := http.Post(registryEndpoint, "application/json", bytes.NewBuffer(body))
 
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error().Msg(err.Error())
 		return "", err
 	}
 
 	respBody, _ := io.ReadAll(resp.Body)
-	fmt.Printf("Successfully registered with service id: %s\n", string(respBody))
+	log.Info().Msgf("Successfully registered with service id: %s", string(respBody))
 
 	defer resp.Body.Close()
 

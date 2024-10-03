@@ -2,12 +2,12 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"http-server/models"
 	"http-server/service"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 // this function currently matches login credentials to a user
@@ -56,7 +56,7 @@ func CreateNewAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 	} else {
-		fmt.Printf("created user: %v\n", newUser)
+		log.Info().Msgf("created user: %v", newUser)
 		w.Write([]byte("success!")) // change this
 	}
 }

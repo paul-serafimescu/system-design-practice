@@ -8,24 +8,29 @@ import (
 	"http-server/database"
 	"http-server/service"
 	"os"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+
 	cfg := config.GetConfig()
 
 	pg, err := database.ConnectToDB(context.Background(), cfg)
 	if err != nil {
-		// handle error in some way here
-		os.Exit(1) // change this later
+		log.Fatal().Msgf("%v", err)
+		os.Exit(1)
 	}
 
 	defer pg.Close()
 
 	if err := pg.Ping(context.Background()); err != nil {
-		fmt.Printf("%s\n", err.Error())
-		os.Exit(1) // TODO
+		log.Fatal().Msgf("%v", err)
+		os.Exit(1)
 	} else {
-		fmt.Println("Connected to database...")
+		log.Info().Msg("Connected to database...")
 	}
 
 	cache := database.ConnectToCache(context.Background(), cfg)
@@ -36,7 +41,7 @@ func main() {
 		fmt.Printf("%s\n", err.Error())
 		os.Exit(1)
 	} else {
-		fmt.Println("Connected to cache (redis)...")
+		log.Info().Msg("Connected to cache (redis)...")
 	}
 
 	cache.OnWebsocketExpiration = func(serviceId string) error {
@@ -46,13 +51,13 @@ func main() {
 			return err
 		}
 
-		fmt.Printf("service %s is DOWN", serviceId)
+		log.Error().Msgf("service %s is DOWN", serviceId)
 
 		return nil
 	}
 
 	cache.OnError = func(err error) {
-		fmt.Printf("%s", err.Error())
+		log.Error().Msgf("%s", err.Error())
 	}
 
 	go cache.HandleKeyExpiration()

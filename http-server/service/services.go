@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 func ValidateRegistrationRequest(r *models.ServiceRegistrationRequest) bool {
@@ -54,8 +55,7 @@ func RegisterWebsocket(r *models.ServiceRegistrationRequest) (*string, error) {
 		return nil, err
 	}
 
-	// TODO: change this message to a proper log
-	fmt.Printf("websocket service with id: %s has been registered and will expire in %s\n", serviceId, expiration.String())
+	log.Info().Msgf("websocket service with id: %s has been registered and will expire in %s", serviceId, expiration.String())
 
 	return &serviceId, nil
 }
@@ -80,7 +80,7 @@ func DeregisterService(serviceId string) error {
 		return fmt.Errorf("invalid service type")
 	}
 
-	fmt.Println("successfully deleted")
+	log.Info().Msgf("successfully deleted")
 
 	return nil
 }

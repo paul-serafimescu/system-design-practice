@@ -1,12 +1,11 @@
 package websocket
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"websocket-server/models"
 
 	"github.com/gorilla/websocket"
+	"github.com/rs/zerolog/log"
 )
 
 var upgrader = websocket.Upgrader{
@@ -23,7 +22,7 @@ func (c *wsConnection) sendMessage(msg *models.ChatMessage) {
 	err := c.conn.WriteJSON(msg)
 
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		log.Error().Msgf("%v", err)
 	}
 }
 
@@ -31,7 +30,7 @@ func WsConnectionHandler(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil) // nil because no cookies (for now at least)
 
 	if err != nil {
-		log.Println(err)
+		log.Error().Msgf("%v", err)
 		return
 	}
 

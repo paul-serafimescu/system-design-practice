@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 import {
   Box,
   Button,
@@ -10,8 +10,9 @@ import {
   CssBaseline,
   ThemeProvider,
   createTheme,
-} from '@mui/material';
-import SHA256 from 'crypto-js/sha256';
+} from "@mui/material";
+import SHA256 from "crypto-js/sha256";
+import { useNavigate } from "react-router-dom";
 
 const theme = createTheme();
 
@@ -20,25 +21,27 @@ interface IProps {
 }
 
 const LoginForm: React.FC<IProps> = ({ setWs }) => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [username, setUsername] = useState<string>(''); // New state for username
-  const [firstname, setFirstname] = useState<string>(''); // New state for firstname
-  const [lastname, setLastname] = useState<string>(''); // New state for lastname
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [username, setUsername] = useState<string>(""); // New state for username
+  const [firstname, setFirstname] = useState<string>(""); // New state for firstname
+  const [lastname, setLastname] = useState<string>(""); // New state for lastname
   const [error, setError] = useState<string | null>(null);
   const [isSignup, setIsSignup] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      const url = isSignup 
-        ? 'http://localhost:8080/auth/signup' 
-        : 'http://localhost/api/auth/login';
-      
+      const url = isSignup
+        ? "http://localhost:8080/auth/signup"
+        : "http://localhost/api/auth/login";
+
       // Prepare data based on the form mode
-      const data = isSignup 
+      const data = isSignup
         ? {
             username,
             firstname,
@@ -51,35 +54,45 @@ const LoginForm: React.FC<IProps> = ({ setWs }) => {
             password: SHA256(password).toString(),
           };
 
-      const response = await axios.post<{ token: string, chat_hostname: string, chat_port: number }>(
-        url,
-        data,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await axios.post<{
+        token: string;
+        chat_hostname: string;
+        chat_port: number;
+      }>(url, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!isSignup) {
-        const { token, chat_hostname: hostname, chat_port: port } = response.data;
+        const {
+          token,
+          chat_hostname: hostname,
+          chat_port: port,
+        } = response.data;
         console.log(token, hostname, port);
-  
+
         const wsUrl = `ws://localhost:${port}/connect`;
         setWs(new WebSocket(wsUrl));
+
+        navigate("/channels/@me");
       }
 
       // Reset fields after successful sign-up
       if (isSignup) {
-        setUsername('');
-        setFirstname('');
-        setLastname('');
-        setEmail('');
-        setPassword('');
+        setUsername("");
+        setFirstname("");
+        setLastname("");
+        setEmail("");
+        setPassword("");
+
+        navigate("/login");
       }
     } catch (err) {
-      console.error(`${isSignup ? 'Sign up' : 'Login'} failed:`, err);
-      setError(`${isSignup ? 'Sign up' : 'Login'} failed. Please check your credentials and try again.`);
+      console.error(`${isSignup ? "Sign up" : "Login"} failed:`, err);
+      setError(
+        `${isSignup ? "Sign up" : "Login"} failed. Please check your credentials and try again.`,
+      );
     }
   };
 
@@ -90,13 +103,13 @@ const LoginForm: React.FC<IProps> = ({ setWs }) => {
         <Box
           sx={{
             marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
           <Typography component="h1" variant="h5">
-            {isSignup ? 'Sign Up' : 'Login'}
+            {isSignup ? "Sign Up" : "Login"}
           </Typography>
           <Box
             component="form"
@@ -176,7 +189,7 @@ const LoginForm: React.FC<IProps> = ({ setWs }) => {
               color="primary"
               sx={{ mt: 3, mb: 2 }}
             >
-              {isSignup ? 'Sign Up' : 'Login'}
+              {isSignup ? "Sign Up" : "Login"}
             </Button>
             <Button
               fullWidth
@@ -184,7 +197,9 @@ const LoginForm: React.FC<IProps> = ({ setWs }) => {
               onClick={() => setIsSignup((prev) => !prev)}
               sx={{ mt: 2 }}
             >
-              {isSignup ? 'Already have an account? Login' : 'Don\'t have an account? Sign Up'}
+              {isSignup
+                ? "Already have an account? Login"
+                : "Don't have an account? Sign Up"}
             </Button>
           </Box>
         </Box>
