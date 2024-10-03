@@ -47,6 +47,45 @@ ALTER COLUMN Status TYPE RegisteredServiceStatus USING Status::RegisteredService
 ALTER TABLE registered_service
 ADD CONSTRAINT service_type_check CHECK (Type IN (0, 1));
 
+CREATE TABLE IF NOT EXISTS community (
+    community_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    community_name VARCHAR(32) NOT NULL,
+    community_description VARCHAR(256),
+    owner_id UUID NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    region VARCHAR(32),
+    icon_url VARCHAR(256),
+    FOREIGN KEY (owner_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS channel (
+    channel_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    channel_name VARCHAR(32) NOT NULL,
+    channel_description VARCHAR(256),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    position INTEGER DEFAULT 0,
+    community_id UUID NOT NULL,
+    last_message_id UUID,
+    FOREIGN KEY (community_id) REFERENCES community(community_id)
+);
+
+CREATE TABLE IF NOT EXISTS text_message (
+    message_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    community_id UUID NOT NULL,
+    channel_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    content VARCHAR(2048) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    is_edit BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (community_id) REFERENCES community(community_id) ON DELETE CASCADE,
+    FOREIGN KEY (channel_id) REFERENCES channel(channel_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -65,6 +104,20 @@ BEFORE UPDATE ON registered_service
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_community_updated_at
+BEFORE UPDATE ON community
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_channel_updated_at
+BEFORE UPDATE ON channel
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_text_message_updated_at
+BEFORE UPDATE ON text_message
+FOR EACH ROW 
+EXECUTE FUNCTION update_updated_at_column();
 
 -- DUMMY DATA --
 INSERT INTO Users (user_id, username, password_hash, email, firstname, lastname)

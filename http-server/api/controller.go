@@ -41,6 +41,13 @@ func CreateApiServer() *ApiServer {
 		r.Get("/heartbeat", ReceiveHeartbeat)
 	})
 
+	r.Route("/community", func(r chi.Router) {
+		r.Get("{communityID}", GetCommunity)
+		r.Route("{communityID}/channels", func(r chi.Router) {
+			r.Get("{channelID}", GetChannel)
+		})
+	})
+
 	return &ApiServer{
 		router: r,
 	}

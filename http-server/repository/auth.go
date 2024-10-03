@@ -11,7 +11,7 @@ import (
 func GetUserById(userId string) *models.User {
 	var user models.User
 
-	sql := "SELECT user_id, username, email, firstname, lastname, created_at, updated_at FROM Users WHERE user_id = $1"
+	sql := "SELECT user_id, username, email, firstname, lastname, created_at, updated_at FROM users WHERE user_id = $1"
 	err := database.Get().QueryRow(context.Background(), sql, userId).Scan(
 		&user.ID,
 		&user.Username,
@@ -38,7 +38,7 @@ func CreateNewUser(username string, hashedPassword string, email string, firstna
 		LastName:  lastname,
 	}
 
-	sql := "INSERT INTO Users (username, password_hash, email, firstname, lastname) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, created_at, updated_at"
+	sql := "INSERT INTO users (username, password_hash, email, firstname, lastname) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, created_at, updated_at"
 	err := database.Get().QueryRow(context.Background(), sql,
 		username,
 		hashedPassword,
@@ -57,7 +57,7 @@ func CreateNewUser(username string, hashedPassword string, email string, firstna
 func GetUserByEmailAndPassword(email string, password string) *models.User {
 	var user models.User
 
-	sql := "SELECT user_id, username, email, firstname, lastname, created_at, updated_at FROM Users WHERE email = $1 AND password_hash = $2"
+	sql := "SELECT user_id, username, email, firstname, lastname, created_at, updated_at FROM users WHERE email = $1 AND password_hash = $2"
 	err := database.Get().QueryRow(context.Background(), sql, email, password).Scan(
 		&user.ID,
 		&user.Username,
